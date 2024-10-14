@@ -13,7 +13,7 @@ AMainCharacter::AMainCharacter()
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 	SpringArm->SetupAttachment(GetRootComponent());
-	SpringArm->TargetArmLength = 300.f;
+	SpringArm->TargetArmLength = 400.f;
 	
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	ViewCamera->SetupAttachment(SpringArm);
