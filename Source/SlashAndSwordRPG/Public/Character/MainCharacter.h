@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "CharacterStates.h"
 #include "MainCharacter.generated.h"
 
 class UInputMappingContext;
@@ -45,6 +46,8 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Equip();
 private:
+	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+	
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArm;
 
@@ -55,4 +58,5 @@ private:
 	AItem* OverlappingItem;
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item){ OverlappingItem = Item; }
+	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 };
