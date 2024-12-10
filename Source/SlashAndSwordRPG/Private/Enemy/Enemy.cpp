@@ -1,6 +1,7 @@
 #include "Enemy/Enemy.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 class UAnimInstance;
 
@@ -33,16 +34,16 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AEnemy::GetHit(const FVector& HitPoint)
 {
-	DrawDebugSphere(GetWorld(), HitPoint, 5.0f, 12, FColor::Cyan, false, 10.f);
-	PlayHitReactMontage(FName("DynamicReactRight"));
+	DirectionalHitReact(HitPoint);
 
-	const FVector Forward = GetActorForwardVector();
-	const FVector HitPointLowered(HitPoint.X, HitPoint.Y, GetActorLocation().Z);
-	const FVector ToHit = (HitPointLowered - GetActorLocation()).GetSafeNormal();
-
-	const double CosTheta = FVector::DotProduct(Forward, ToHit);
-	double Theta = FMath::Acos(CosTheta);
-	Theta = FMath::RadiansToDegrees(Theta);
+	if(HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			HitSound,
+			HitPoint
+		);
+	}
 }
 
 void AEnemy::PlayHitReactMontage(const FName& SectionName) const
@@ -53,4 +54,39 @@ void AEnemy::PlayHitReactMontage(const FName& SectionName) const
 		AnimInstance->Montage_Play(HitReactMontage);
 		AnimInstance->Montage_JumpToSection(SectionName, HitReactMontage);
 	}
+}
+
+void AEnemy::DirectionalHitReact(const FVector& HitPoint)
+{
+	DrawDebugSphere(GetWorld(), HitPoint, 5.0f, 12, FColor::Cyan, false, 10.f);
+
+	const FVector Forward = GetActorForwardVector();
+	const FVector HitPointLowered(HitPoint.X, HitPoint.Y, GetActorLocation().Z);
+	// finding vector from character to the hit point
+	const FVector ToHit = (HitPointLowered - GetActorLocation()).GetSafeNormal();
+	// finding the angle between forward vector of the character and the HitVector
+	const double CosTheta = FVector::DotProduct(Forward, ToHit);
+	double Theta = FMath::Acos(CosTheta);
+	Theta = FMath::RadiansToDegrees(Theta);
+	// finding CrossProduct to understand the direction of the hit (whether right or left side hit)
+	const FVector CrossProduct = FVector::CrossProduct(Forward, ToHit);
+	if(CrossProduct.Z < 0)
+	{
+		Theta *= -1.f;
+	}
+
+	FName SectionName = FName("OnPlaceReactSecond");
+
+	if(Theta >= -45.f && Theta < 45.f)
+	{
+		SectionName = FName("DynamicReactBackward");
+	} else if(Theta >= -135.f && Theta < -45.f)
+	{
+		SectionName = FName("DynamicReactLeft");
+	} else if(Theta >= 45.f && Theta < 135.f)
+	{
+		SectionName = FName("DynamicReactRight");
+	}
+	
+	PlayHitReactMontage(SectionName);
 }

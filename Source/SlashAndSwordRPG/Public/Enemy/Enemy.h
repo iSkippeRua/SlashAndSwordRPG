@@ -24,9 +24,13 @@ protected:
 
 	/* Play Montage Functions */
 	void PlayHitReactMontage(const FName& SectionName) const;
+	void DirectionalHitReact(const FVector& HitPoint);
 	
 private:
 	/* Animation Montages */
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* HitReactMontage;
+
+	UPROPERTY(EditAnywhere, Category = Sounds)
+	USoundBase* HitSound;
 };
